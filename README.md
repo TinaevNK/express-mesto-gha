@@ -1,28 +1,58 @@
-[![Tests](https://github.com/yandex-praktikum/express-mesto-gha/actions/workflows/tests-13-sprint.yml/badge.svg)](https://github.com/yandex-praktikum/express-mesto-gha/actions/workflows/tests-13-sprint.yml) [![Tests](https://github.com/yandex-praktikum/express-mesto-gha/actions/workflows/tests-14-sprint.yml/badge.svg)](https://github.com/yandex-praktikum/express-mesto-gha/actions/workflows/tests-14-sprint.yml)
-# Проект Mesto фронтенд + бэкенд
+[![Tests for sprint 13](https://github.com/TinaevNK/express-mesto-gha/actions/workflows/tests-13-sprint.yml/badge.svg)](https://github.com/TinaevNK/express-mesto-gha/actions/workflows/tests-13-sprint.yml) 
 
+[![Tests for sprint 14](https://github.com/TinaevNK/express-mesto-gha/actions/workflows/tests-14-sprint.yml/badge.svg)](https://github.com/TinaevNK/express-mesto-gha/actions/workflows/tests-14-sprint.yml)
+# ***Проект Mesto фронтенд + бэкенд***
+Данный проект является итоговой работой за 13-14 спринт на ***Яндекс.Практикуме***.
+## *Описание*
+----
+### ***О чём проект?***
 
+Данное серверное приложение предназначено для храниния и обмена файлами с вэб-приложением Mesto.
 
-## Настройка бейджей статуса тестов
-Перед началом работы над проектом рекомендуется исправить бейджи, отражающие статус прохождения тестов.
-Для этого замените разметку бейджей на следующий фрагмент, подставив вместо `${имя_пользователя}` и `${имя_репозитория}` соответствующие значения.
+***В нём представлены:***
 
-```
-[![Tests for sprint 13](https://github.com/${имя_пользователя}/${имя репозитория}/actions/workflows/tests-13-sprint.yml/badge.svg)](https://github.com/${имя_пользователя}/${имя репозитория}/actions/workflows/tests-13-sprint.yml) 
+* Модели (схемы) для базы данных;
+* Контроллеры;
+* Роуты.
 
-[![Tests for sprint 14](https://github.com/${имя_пользователя}/${имя репозитория}/actions/workflows/tests-14-sprint.yml/badge.svg)](https://github.com/${имя_пользователя}/${имя репозитория}/actions/workflows/tests-14-sprint.yml)
-```
+---
+## *Функциональность:*
+* Регистрация;
+* Авторизация;
+* Обновление данных пользователя;
+* Обновление аватара;
+* Получение списка пользователя;
+* Получение пользователя по ID;
+* Получение информации о текущем пользователе;
+* Получение списка карточек;
+* Создание карточки;
+* Удаление карточки;
+* Постановка лайка;
+* Снятие лайка;
+* Ообработка ошибок;
+* Валидация входящих данных.
+---
+## *Используемые технологии:*
 
+* NodeJS
+* Express
+* MongoDB
+* Mongoose
+---
+## *Планы по доработке*
+* Реализовать регистрацию пользователей;
+* Реализовать авторизацию пользователей;
+* Доработать валидацию и создать классы ошибок.
+## Директории:
 
-## Директории
+`/routes` — папка с файлами роутера;
+`/controllers` — папка с файлами контроллеров пользователя и карточки;   
+`/models` — папка с файлами описания схем пользователя и карточки.
 
-`/routes` — папка с файлами роутера  
-`/controllers` — папка с файлами контроллеров пользователя и карточки   
-`/models` — папка с файлами описания схем пользователя и карточки  
-  
-Остальные директории вспомогательные, создаются при необходимости разработчиком
-
-## Запуск проекта
-
-`npm run start` — запускает сервер   
-`npm run dev` — запускает сервер с hot-reload
+---
+## Запуск проекта:
+`npm i` — установка зависимостей;
+`mongod` — запускает mongodDB;
+`npm run lint` — запускает линтер;
+`npm run start` — запускает сервер;   
+`npm run dev` — запускает сервер с hot-reload и отладчиком кода.
