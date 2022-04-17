@@ -22,7 +22,4 @@ app.use(router);
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
-app.listen(PORT, () => {
-  // Если всё работает, консоль покажет, какой порт приложение слушает
-  console.log(`App listening on port ${PORT}`);
-});
+app.listen(PORT);
