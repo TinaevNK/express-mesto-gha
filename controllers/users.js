@@ -27,8 +27,40 @@ const postUsers = (req, res) => {
     .catch((err) => res.status(500).send({ message: err.message }));
 };
 
+// PATCH /users/me — обновляет профиль
+const updateUserData = (req, res) => {
+  const userId = req.user._id;
+  const { name, about } = req.body;
+  User.findByIdAndUpdate(userId, { name, about }, { new: true })
+    .then((user) => {
+      if (user) {
+        res.status(200).send({ data: user });
+      } else {
+        res.status(400).send({ message: 'Пользователь с указанным _id не найден' });
+      }
+    })
+    .catch((err) => res.status(500).send({ message: err.message }));
+};
+
+// PATCH /users/me/avatar — обновляет аватар
+const updateUserAvatar = (req, res) => {
+  const userId = req.user._id;
+  const { avatar } = req.body;
+  User.findByIdAndUpdate(userId, { avatar }, { new: true })
+    .then((user) => {
+      if (user) {
+        res.status(200).send({ data: user });
+      } else {
+        res.status(400).send({ message: 'Пользователь с указанным _id не найден' });
+      }
+    })
+    .catch((err) => res.status(500).send({ message: err.message }));
+};
+
 module.exports = {
   getUsers,
   getUserById,
   postUsers,
+  updateUserData,
+  updateUserAvatar,
 };
