@@ -1,9 +1,14 @@
-const bcrypt = require('bcryptjs'); // импортируем bcrypt
+// файл .env не выгружаю, но в нем записаны следующие данные:
+// NODE_ENV=production
+// JWT_SECRET = 'a4768f7eb2a93f64b0dcbc8998e135d1b14bf747b52ba2a7aaf11a2fe34cb2b0'
+
+const { NODE_ENV, JWT_SECRET } = process.env;
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { ERROR_CODE_BAD_REQUEST, ERROR_CODE_NOT_FOUND, ERROR_CODE_INTERNAL_SERVER_ERROR } = require('../constants');
 const NotFoundError = require('../errors/not-found-error');
 const BadRequestError = require('../errors/bad-request-error');
-const UnauthorizedError = require('../errors/unauthorized-error');
 const ConflictError = require('../errors/conflict-error');
 
 // GET /users — возвращает всех пользователей
@@ -55,6 +60,17 @@ const createUser = (req, res, next) => {
     });
 };
 
+// POST /signin аутентификация (вход)
+const login = (req, res, next) => {
+  const { email, password } = req.body;
+  User.findUserByCredentials({ email, password })
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-key', { expiresIn: '7d' });
+      res.send({ token });
+    })
+    .catch(next);
+};
+
 // PATCH /users/me — обновляет профиль
 const updateUserData = (req, res) => {
   const userId = req.user._id;
@@ -101,6 +117,7 @@ module.exports = {
   getUsers,
   getUserById,
   createUser,
+  login,
   updateUserData,
   updateUserAvatar,
 };
