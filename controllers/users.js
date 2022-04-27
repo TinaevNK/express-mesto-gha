@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const bcrypt = require('bcryptjs');
 const { ERROR_CODE_BAD_REQUEST, ERROR_CODE_NOT_FOUND, ERROR_CODE_INTERNAL } = require('../constants');
 
 // GET /users — возвращает всех пользователей
@@ -28,11 +29,16 @@ const getUserById = (req, res) => {
 };
 
 // POST /users — создаёт пользователя
-const postUsers = (req, res) => {
-  const { name, about, avatar } = req.body;
+const createUsers = (req, res) => {
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
 
-  User.create({ name, about, avatar })
-    .then((users) => res.send(users))
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      name, about, avatar, email, password: hash,
+    }))
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(ERROR_CODE_BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя.' });
@@ -87,7 +93,7 @@ const updateUserAvatar = (req, res) => {
 module.exports = {
   getUsers,
   getUserById,
-  postUsers,
+  createUsers,
   updateUserData,
   updateUserAvatar,
 };
