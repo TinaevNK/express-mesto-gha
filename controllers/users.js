@@ -1,10 +1,10 @@
 const bcrypt = require('bcryptjs'); // импортируем bcrypt
 const User = require('../models/user');
-const { ERROR_CODE_BAD_REQUEST, ERROR_CODE_NOT_FOUND, ERROR_CODE_INTERNAL } = require('../constants');
-// const NotFoundError = require('../errors/not-found-err');
-const BadRequestError = require('../errors/bad-request-err');
-// const BadAuthError = require('../errors/bad-auth-err');
-const ExistEmailError = require('../errors/exist-email-err');
+const { ERROR_CODE_BAD_REQUEST, ERROR_CODE_NOT_FOUND, ERROR_CODE_INTERNAL_SERVER_ERROR } = require('../constants');
+// const NotFoundError = require('../errors/not-found-error');
+const BadRequestError = require('../errors/bad-request-error');
+// const BadAuthError = require('../errors/bad-auth-error');
+const ExistEmailError = require('../errors/conflict-error');
 
 // GET /users — возвращает всех пользователей
 const getUsers = (req, res) => {
@@ -16,6 +16,9 @@ const getUsers = (req, res) => {
 // GET /users/:userId - возвращает пользователя по _id
 const getUserById = (req, res) => {
   User.findById(req.params.userId)
+    .orFail(() => {
+      throw new
+    })
     .then((user) => {
       if (!user) {
         res.status(ERROR_CODE_NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден.' });
@@ -27,7 +30,7 @@ const getUserById = (req, res) => {
       if (err.name === 'CastError') {
         res.status(ERROR_CODE_BAD_REQUEST).send({ message: 'Передан некорректный _id пользователя.' });
       } else {
-        res.status(ERROR_CODE_INTERNAL).send({ message: err.message });
+        res.status(ERROR_CODE_INTERNAL_SERVER_ERROR).send({ message: err.message });
       }
     });
 };
@@ -74,7 +77,7 @@ const updateUserData = (req, res) => {
       if (err.name === 'ValidationError') {
         res.status(ERROR_CODE_BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
       } else {
-        res.status(ERROR_CODE_INTERNAL).send({ message: err.message });
+        res.status(ERROR_CODE_INTERNAL_SERVER_ERROR).send({ message: err.message });
       }
     });
 };
@@ -95,7 +98,7 @@ const updateUserAvatar = (req, res) => {
       if (err.name === 'ValidationError') {
         res.status(ERROR_CODE_BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении аватара.' });
       } else {
-        res.status(ERROR_CODE_INTERNAL).send({ message: err.message });
+        res.status(ERROR_CODE_INTERNAL_SERVER_ERROR).send({ message: err.message });
       }
     });
 };
