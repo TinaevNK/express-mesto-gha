@@ -21,6 +21,8 @@
   },
   "homepage": "https://github.com/TinaevNK/express-mesto-gha#readme",
   "dependencies": {
+    "bcrypt": "^5.0.1",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.0",
     "express": "^4.17.3",
     "mongoose": "^6.3.0",

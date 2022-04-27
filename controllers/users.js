@@ -1,6 +1,10 @@
+const bcrypt = require('bcryptjs'); // импортируем bcrypt
 const User = require('../models/user');
-const bcrypt = require('bcryptjs');
 const { ERROR_CODE_BAD_REQUEST, ERROR_CODE_NOT_FOUND, ERROR_CODE_INTERNAL } = require('../constants');
+// const NotFoundError = require('../errors/not-found-err');
+const BadRequestError = require('../errors/bad-request-err');
+// const BadAuthError = require('../errors/bad-auth-err');
+const ExistEmailError = require('../errors/exist-email-err');
 
 // GET /users — возвращает всех пользователей
 const getUsers = (req, res) => {
@@ -28,11 +32,15 @@ const getUserById = (req, res) => {
     });
 };
 
-// POST /users — создаёт пользователя
-const createUsers = (req, res) => {
+// POST /signup — создаёт пользователя
+const createUsers = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
+
+  if (!email || !password) {
+    next(new BadRequestError('Поля email и password обязательны.'));
+  }
 
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
@@ -41,9 +49,11 @@ const createUsers = (req, res) => {
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ERROR_CODE_BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя.' });
+        next(new BadRequestError('Переданы некорректные данные при создании пользователя.'));
+      } else if (err.code === 11000) {
+        next(new ExistEmailError('Передан уже зарегистрированный email.'));
       } else {
-        res.status(ERROR_CODE_INTERNAL).send({ message: err.message });
+        next(err);
       }
     });
 };
