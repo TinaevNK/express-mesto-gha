@@ -1,42 +1,36 @@
 const bcrypt = require('bcryptjs'); // импортируем bcrypt
 const User = require('../models/user');
 const { ERROR_CODE_BAD_REQUEST, ERROR_CODE_NOT_FOUND, ERROR_CODE_INTERNAL_SERVER_ERROR } = require('../constants');
-// const NotFoundError = require('../errors/not-found-error');
+const NotFoundError = require('../errors/not-found-error');
 const BadRequestError = require('../errors/bad-request-error');
-// const BadAuthError = require('../errors/bad-auth-error');
-const ExistEmailError = require('../errors/conflict-error');
+const UnauthorizedError = require('../errors/unauthorized-error');
+const ConflictError = require('../errors/conflict-error');
 
 // GET /users — возвращает всех пользователей
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch((err) => res.status(ERROR_CODE_INTERNAL).send({ message: err.message }));
+    .catch(next);
 };
 
 // GET /users/:userId - возвращает пользователя по _id
-const getUserById = (req, res) => {
+const getUserById = (req, res, next) => {
   User.findById(req.params.userId)
     .orFail(() => {
-      throw new
+      throw new NotFoundError('Пользователь по указанному _id не найден.');
     })
-    .then((user) => {
-      if (!user) {
-        res.status(ERROR_CODE_NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден.' });
-      } else {
-        res.send({ user });
-      }
-    })
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERROR_CODE_BAD_REQUEST).send({ message: 'Передан некорректный _id пользователя.' });
+        next(new BadRequestError('Передан некорректный _id пользователя.'));
       } else {
-        res.status(ERROR_CODE_INTERNAL_SERVER_ERROR).send({ message: err.message });
+        next(err);
       }
     });
 };
 
 // POST /signup — создаёт пользователя
-const createUsers = (req, res, next) => {
+const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -54,7 +48,7 @@ const createUsers = (req, res, next) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при создании пользователя.'));
       } else if (err.code === 11000) {
-        next(new ExistEmailError('Передан уже зарегистрированный email.'));
+        next(new ConflictError('Передан уже зарегистрированный email.'));
       } else {
         next(err);
       }
@@ -106,7 +100,7 @@ const updateUserAvatar = (req, res) => {
 module.exports = {
   getUsers,
   getUserById,
-  createUsers,
+  createUser,
   updateUserData,
   updateUserAvatar,
 };
