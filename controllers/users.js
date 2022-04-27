@@ -6,7 +6,6 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const { ERROR_CODE_BAD_REQUEST, ERROR_CODE_NOT_FOUND, ERROR_CODE_INTERNAL_SERVER_ERROR } = require('../constants');
 const NotFoundError = require('../errors/not-found-error');
 const BadRequestError = require('../errors/bad-request-error');
 const ConflictError = require('../errors/conflict-error');
@@ -22,7 +21,7 @@ const getUsers = (req, res, next) => {
 const getUserById = (req, res, next) => {
   User.findById(req.params.userId)
     .orFail(() => {
-      throw new NotFoundError('Пользователь по указанному _id не найден.');
+      next(new NotFoundError('Пользователь по указанному _id не найден.'));
     })
     .then((user) => res.send(user))
     .catch((err) => {
@@ -71,44 +70,61 @@ const login = (req, res, next) => {
     .catch(next);
 };
 
-// PATCH /users/me — обновляет профиль
-const updateUserData = (req, res) => {
-  const userId = req.user._id;
-  const { name, about } = req.body;
-  User.findByIdAndUpdate(userId, { name, about }, { new: true, runValidators: true })
+// GET /users/me - возвращает информацию о текущем пользователе
+const getUserInfo = (req, res, next) => {
+  User.findById(req.user._id)
     .then((user) => {
       if (!user) {
-        res.status(ERROR_CODE_NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден.' });
+        next(new NotFoundError('Пользователь по указанному _id не найден.'));
+      }
+      return res.send(user);
+    })
+    .catch((err) => {
+      if (err.kind === 'ObjectId') {
+        next(new BadRequestError('Передан некорректный _id пользователя.'));
+      } else {
+        next(err);
+      }
+    });
+};
+
+// PATCH /users/me — обновляет профиль
+const updateUserData = (req, res, next) => {
+  const { name, about } = req.body;
+  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
+    .then((user) => {
+      if (!user) {
+        next(new NotFoundError('Пользователь по указанному _id не найден.'));
       } else {
         res.send({ user });
       }
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ERROR_CODE_BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
+        next(new BadRequestError('Переданы некорректные данные при обновлении профиля.'));
       } else {
-        res.status(ERROR_CODE_INTERNAL_SERVER_ERROR).send({ message: err.message });
+        next(err);
       }
     });
 };
 
 // PATCH /users/me/avatar — обновляет аватар
-const updateUserAvatar = (req, res) => {
+const updateUserAvatar = (req, res, next) => {
   const userId = req.user._id;
   const { avatar } = req.body;
   User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        res.status(ERROR_CODE_NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден.' });
+        next(new NotFoundError('Пользователь по указанному _id не найден.'));
       } else {
         res.send({ user });
       }
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ERROR_CODE_BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении аватара.' });
+        next(new BadRequestError('Переданы некорректные данные при обновлении аватара.'));
       } else {
-        res.status(ERROR_CODE_INTERNAL_SERVER_ERROR).send({ message: err.message });
+        next(err);
       }
     });
 };
@@ -118,6 +134,7 @@ module.exports = {
   getUserById,
   createUser,
   login,
+  getUserInfo,
   updateUserData,
   updateUserAvatar,
 };
