@@ -1,50 +1,53 @@
 const Card = require('../models/card');
-const { ERROR_CODE_BAD_REQUEST, ERROR_CODE_NOT_FOUND, ERROR_CODE_INTERNAL_SERVER_ERROR } = require('../constants');
+const NotFoundError = require('../errors/not-found-error');
+const BadRequestError = require('../errors/bad-request-error');
+const ForbiddenError = require('../errors/forbidden-error');
 
 // GET /cards — возвращает все карточки
-const getCards = (req, res) => {
+const getCards = (req, res, next) => {
   Card.find({})
-    .then((cards) => res.status(200).send(cards))
-    .catch((err) => res.status(ERROR_CODE_INTERNAL_SERVER_ERROR).send({ message: err.message }));
+    .then((cards) => res.send(cards))
+    .catch(next);
 };
 
 // POST /cards — создаёт карточку
-const createCard = (req, res) => {
+const createCard = (req, res, next) => {
   const { name, link } = req.body;
-  const owner = req.user._id;
 
-  Card.create({ name, link, owner })
+  Card.create({ name, link, owner: req.user._id })
     .then((card) => res.send({ card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ERROR_CODE_BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании карточки.' });
+        next(new BadRequestError('Переданы некорректные данные при создании карточки.'));
       } else {
-        res.status(ERROR_CODE_INTERNAL_SERVER_ERROR).send({ message: err.message });
+        next(err);
       }
     });
 };
 
 // DELETE /cards/:cardId — удаляет карточку по идентификатору
-const deleteCard = (req, res) => {
+const deleteCard = (req, res, next) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (!card) {
-        res.status(ERROR_CODE_NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена.' });
+        next(new NotFoundError('Карточка с указанным _id не найдена.'));
+      } else if (!card.owner.equals(req.user._id)) {
+        next(new ForbiddenError('Попытка удалить чужую карточку.'));
       } else {
         res.send({ card });
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERROR_CODE_BAD_REQUEST).send({ message: 'Переданы некорректные данные при удалении карточки.' });
+        next(new BadRequestError('Переданы некорректные данные при удалении карточки.'));
       } else {
-        res.status(ERROR_CODE_INTERNAL_SERVER_ERROR).send({ message: err.message });
+        next(err);
       }
     });
 };
 
 // PUT /cards/:cardId/likes — поставить лайк карточке
-const likeCard = (req, res) => {
+const likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
@@ -52,22 +55,22 @@ const likeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        res.status(ERROR_CODE_NOT_FOUND).send({ message: 'Передан несуществующий _id карточки.' });
+        next(new NotFoundError('Передан несуществующий _id карточки.'));
       } else {
         res.send({ card });
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERROR_CODE_BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки лайка.' });
+        next(new BadRequestError('Переданы некорректные данные для постановки лайка.'));
       } else {
-        res.status(ERROR_CODE_INTERNAL_SERVER_ERROR).send({ message: err.message });
+        next(err);
       }
     });
 };
 
 // DELETE /cards/:cardId/likes — убрать лайк с карточки
-const dislikeCard = (req, res) => {
+const dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } }, // убрать _id из массива
@@ -75,16 +78,16 @@ const dislikeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        res.status(ERROR_CODE_NOT_FOUND).send({ message: 'Передан несуществующий _id карточки.' });
+        next(new NotFoundError('Передан несуществующий _id карточки.'));
       } else {
         res.send({ card });
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERROR_CODE_BAD_REQUEST).send({ message: 'Переданы некорректные данные для снятии лайка.' });
+        next(new BadRequestError('Переданы некорректные данные для снятии лайка.'));
       } else {
-        res.status(ERROR_CODE_INTERNAL_SERVER_ERROR).send({ message: err.message });
+        next(err);
       }
     });
 };
