@@ -3,16 +3,23 @@ const auth = require('../middlewares/auth');
 const {
   getUsers,
   getUserById,
-  createUser,
+  getUserInfo,
   updateUserData,
   updateUserAvatar,
 } = require('../controllers/users');
+const {
+  validateGetUsers,
+  validateGetUserById,
+  validateGetUserInfo,
+  validateUpdateUser,
+  validateUpdateAvatar,
+} = require('../middlewares/validations');
 
 router.use(auth);
-router.get('/', getUsers);
-router.get('/:userId', getUserById);
-router.post('/', createUser);
-router.patch('/me', updateUserData);
-router.patch('/me/avatar', updateUserAvatar);
+router.get('/', validateGetUsers, getUsers);
+router.get('/:userId', validateGetUserById, getUserById);
+router.post('/me', validateGetUserInfo, getUserInfo);
+router.patch('/me', validateUpdateUser, updateUserData);
+router.patch('/me/avatar', validateUpdateAvatar, updateUserAvatar);
 
 module.exports = router;
