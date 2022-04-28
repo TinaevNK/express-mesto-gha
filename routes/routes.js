@@ -2,7 +2,7 @@ const router = require('express').Router();
 const userRouter = require('./users');
 const cardRouter = require('./cards');
 const { createUser, login } = require('../controllers/users');
-const { ERROR_CODE_NOT_FOUND } = require('../constants');
+const NotFoundError = require('../errors/not-found-error');
 
 router.post('/signup', createUser);
 router.post('/signin', login);
@@ -10,8 +10,8 @@ router.post('/signin', login);
 router.use('/users', userRouter);
 router.use('/cards', cardRouter);
 // Обработаем некорректный маршрут и вернём ошибку 404
-router.use('*', (req, res) => {
-  res.status(ERROR_CODE_NOT_FOUND).send({ message: `Страницы по адресу ${req.baseUrl} не существует` });
+router.use('*', (req, res, next) => {
+  next(new NotFoundError('Ресурс по указанному адресу не найден'));
 });
 
 module.exports = router;

@@ -11,15 +11,6 @@ const app = express();
 
 app.use(bodyParser.json()); // для собирания JSON-формата
 
-// временное решение регистрации, позже уберём
-app.use((req, res, next) => {
-  req.user = {
-    _id: '625b021e6f75c882a4ed613f',
-  };
-
-  next();
-});
-
 app.use(router);
 
 app.use(errorHandler); // мидлвара централизованного обработчика ошибок
