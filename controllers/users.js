@@ -36,32 +36,21 @@ const getUserById = (req, res, next) => {
 // GET /users/me - возвращает информацию о текущем пользователе
 const getUserInfo = (req, res, next) => {
   User.findById(req.user._id)
-    .then((user) => {
-      if (!user) {
-        next(new NotFoundError('Пользователь по указанному _id не найден.'));
-      }
-      return res.send(user);
+    .orFail(() => {
+      next(new NotFoundError('Пользователь по указанному _id не найден.'));
     })
-    .catch((err) => {
-      if (err.kind === 'ObjectId') {
-        next(new BadRequestError('Передан некорректный _id пользователя.'));
-      } else {
-        next(err);
-      }
-    });
+    .then((user) => res.send(user))
+    .catch(next);
 };
 
 // PATCH /users/me — обновляет профиль
 const updateUserData = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
-    .then((user) => {
-      if (!user) {
-        next(new NotFoundError('Пользователь по указанному _id не найден.'));
-      } else {
-        res.send({ user });
-      }
+    .orFail(() => {
+      next(new NotFoundError('Пользователь по указанному _id не найден.'));
     })
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при обновлении профиля.'));
@@ -71,17 +60,17 @@ const updateUserData = (req, res, next) => {
     });
 };
 
+// не знаю, есть ли смысл писать обработчик ошибок в catch, если их перехватывает celebrate...
+// таким образом они никода не вызовутся
+
 // PATCH /users/me/avatar — обновляет аватар
 const updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
-    .then((user) => {
-      if (!user) {
-        next(new NotFoundError('Пользователь по указанному _id не найден.'));
-      } else {
-        res.send({ user });
-      }
+    .orFail(() => {
+      next(new NotFoundError('Пользователь по указанному _id не найден.'));
     })
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при обновлении аватара.'));
@@ -105,9 +94,11 @@ const createUser = (req, res, next) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((user) => res.send({
-      name: user.name, about: user.about, avatar: user.avatar, _id: user._id, email: user.email,
-    }))
+    .then((user) => {
+      const newUser = user.toObject();
+      delete newUser.password;
+      res.send(newUser);
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при создании пользователя.'));
