@@ -1,12 +1,12 @@
 const { celebrate, Joi } = require('celebrate');
-const { AVATAR_REGEX } = require('../constants');
+const { LINK_REGEX } = require('../constants');
 
 // POST /signup
 const validateCreateUser = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().pattern(AVATAR_REGEX),
+    avatar: Joi.string().pattern(LINK_REGEX),
     email: Joi.string().required().email(),
     password: Joi.string().required(),
   }),
@@ -30,15 +30,32 @@ const validateGetUserById = celebrate({
 // PATCH /users/me
 const validateUpdateUser = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
-    about: Joi.string().min(2).max(30),
+    name: Joi.string().required().min(2).max(30),
+    about: Joi.string().required().min(2).max(30),
   }),
 });
 
 // PATCH /users/me/avatar
 const validateUpdateAvatar = celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().pattern(AVATAR_REGEX),
+    avatar: Joi.string().required().pattern(LINK_REGEX),
+  }),
+});
+
+// POST /cards
+const validateCreateCard = celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().required().min(2).max(30),
+    link: Joi.string().required().pattern(LINK_REGEX),
+  }),
+});
+
+// DELETE /cards/:cardId
+// PUT /cards/:cardId/likes
+// DELETE /cards/:cardId/likes
+const validateCardId = celebrate({
+  params: Joi.object().keys({
+    cardId: Joi.string().required().length(24).hex(),
   }),
 });
 
@@ -48,4 +65,6 @@ module.exports = {
   validateUpdateAvatar,
   validateCreateUser,
   validateLogin,
+  validateCreateCard,
+  validateCardId,
 };

@@ -4,7 +4,7 @@ const ERROR_CODE_FORBIDDEN = 403;
 const ERROR_CODE_NOT_FOUND = 404;
 const ERROR_CODE_CONFLICT = 409;
 const ERROR_CODE_INTERNAL_SERVER_ERROR = 500;
-const AVATAR_REGEX = /^https?:\/\/(www\.)?[a-zA-Z\d-]+\.[\w\d\-.~:/?#[\]@!$&'()*+,;=]{2,}#?$/;
+const LINK_REGEX = /^https?:\/\/(www\.)?[a-zA-Z\d-]+\.[\w\d\-.~:/?#[\]@!$&'()*+,;=]{2,}#?$/;
 
 module.exports = {
   ERROR_CODE_BAD_REQUEST,
@@ -13,5 +13,5 @@ module.exports = {
   ERROR_CODE_INTERNAL_SERVER_ERROR,
   ERROR_CODE_UNAUTHORIZED,
   ERROR_CODE_CONFLICT,
-  AVATAR_REGEX,
+  LINK_REGEX,
 };

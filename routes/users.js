@@ -3,7 +3,7 @@ const {
   getUsers,
   getUserById,
   getUserInfo,
-  updateUserData,
+  updateUser,
   updateUserAvatar,
 } = require('../controllers/users');
 const {
@@ -17,7 +17,7 @@ router.use(auth);
 router.get('/', getUsers);
 router.get('/me', getUserInfo);
 router.get('/:userId', validateGetUserById, getUserById);
-router.patch('/me', validateUpdateUser, updateUserData);
+router.patch('/me', validateUpdateUser, updateUser);
 router.patch('/me/avatar', validateUpdateAvatar, updateUserAvatar);
 
 module.exports = router;

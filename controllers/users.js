@@ -44,7 +44,7 @@ const getUserInfo = (req, res, next) => {
 };
 
 // PATCH /users/me — обновляет профиль
-const updateUserData = (req, res, next) => {
+const updateUser = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .orFail(() => {
@@ -129,6 +129,6 @@ module.exports = {
   createUser,
   login,
   getUserInfo,
-  updateUserData,
+  updateUser,
   updateUserAvatar,
 };
