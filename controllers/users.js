@@ -2,7 +2,7 @@
 // NODE_ENV=production
 // JWT_SECRET = 'a4768f7eb2a93f64b0dcbc8998e135d1b14bf747b52ba2a7aaf11a2fe34cb2b0'
 
-const { NODE_ENV, JWT_SECRET } = process.env;
+const { NODE_ENV, JWT_SECRET = 'dev-key' } = process.env;
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
@@ -20,9 +20,7 @@ const getUsers = (req, res, next) => {
 // GET /users/:userId - возвращает пользователя по _id
 const getUserById = (req, res, next) => {
   User.findById(req.params.userId)
-    .orFail(() => {
-      next(new NotFoundError('Пользователь по указанному _id не найден.'));
-    })
+    .orFail(() => next(new NotFoundError('Пользователь по указанному _id не найден.')))
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -36,9 +34,7 @@ const getUserById = (req, res, next) => {
 // GET /users/me - возвращает информацию о текущем пользователе
 const getUserInfo = (req, res, next) => {
   User.findById(req.user._id)
-    .orFail(() => {
-      next(new NotFoundError('Пользователь по указанному _id не найден.'));
-    })
+    .orFail(() => next(new NotFoundError('Пользователь по указанному _id не найден.')))
     .then((user) => res.send(user))
     .catch(next);
 };
@@ -47,9 +43,7 @@ const getUserInfo = (req, res, next) => {
 const updateUser = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
-    .orFail(() => {
-      next(new NotFoundError('Пользователь по указанному _id не найден.'));
-    })
+    .orFail(() => next(new NotFoundError('Пользователь по указанному _id не найден.')))
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -60,16 +54,11 @@ const updateUser = (req, res, next) => {
     });
 };
 
-// не знаю, есть ли смысл писать обработчик ошибок в catch, если их перехватывает celebrate...
-// таким образом они никода не вызовутся
-
 // PATCH /users/me/avatar — обновляет аватар
 const updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
-    .orFail(() => {
-      next(new NotFoundError('Пользователь по указанному _id не найден.'));
-    })
+    .orFail(() => next(new NotFoundError('Пользователь по указанному _id не найден.')))
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -109,8 +98,6 @@ const createUser = (req, res, next) => {
       }
     });
 };
-// сделал так, поскольку иначе, если передавать в send просто user, то передаётся и пароль..
-// схему собрал с select, но он почему-то не отрабатывает как нужно
 
 // POST /signin аутентификация (вход)
 const login = (req, res, next) => {
