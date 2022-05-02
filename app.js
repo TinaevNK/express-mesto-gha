@@ -14,7 +14,7 @@ const { PORT = 3000 } = process.env;
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // за 15 минут
-  max: 1000, // можно совершить максимум 100 запросов с одного IP
+  max: 1000, // можно совершить максимум 1000 запросов с одного IP
 });
 
 const app = express();
