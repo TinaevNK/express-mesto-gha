@@ -8,6 +8,7 @@ const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
 const router = require('./routes/routes');
 const errorHandler = require('./middlewares/error-handler');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 // Слушаем 3000 порт
 const { PORT = 3000 } = process.env;
@@ -26,7 +27,10 @@ app.use(limiter); // подключаем rate-limiter
 
 app.use(bodyParser.json()); // для собирания JSON-формата
 
+app.use(requestLogger);
 app.use(router);
+app.use(errorLogger);
+
 app.use(errors()); // обработчик ошибок celebrate
 app.use(errorHandler); // мидлвара централизованного обработчика ошибок
 
