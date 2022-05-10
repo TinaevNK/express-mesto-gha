@@ -6,7 +6,10 @@ const ForbiddenError = require('../errors/forbidden-error');
 // GET /cards — возвращает все карточки
 const getCards = (req, res, next) => {
   Card.find({})
-    .then((cards) => res.send(cards.reverse()))
+    .then((cards) => {
+      const reverseCards = cards.reverse();
+      res.send(reverseCards);
+    })
     .catch(next);
 };
 
